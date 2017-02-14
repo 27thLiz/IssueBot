@@ -4,7 +4,7 @@ import requests
 
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server = "chat.freenode.net" # Server
-channels = ["#oidens_aldens", "#nandakore"] # Channels
+channels = ["#godotengine-devel"] # Channels
 botnick = "IssueBot" # Your bots nick
 adminname = "Hinsbart" #Your IRC nickname.
 exitcode = "!IssueBot-quit"
