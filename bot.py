@@ -17,18 +17,18 @@ ircsock.send(bytes("NICK "+ botnick +"\n", "UTF-8")) # assign the nick to the bo
 
 
 def joinchan(chan): # join channel(s).
-  ircsock.send(bytes("JOIN "+ chan +"\n", "UTF-8")) 
-  ircmsg = ""
-  while ircmsg.find("End of /NAMES list.") == -1:  
-    ircmsg = ircsock.recv(2048).decode("UTF-8")
-    ircmsg = ircmsg.strip('\n\r')
-    print(ircmsg)
+    ircsock.send(bytes("JOIN "+ chan +"\n", "UTF-8"))
+    ircmsg = ""
+    while ircmsg.find("End of /NAMES list.") == -1:
+        ircmsg = ircsock.recv(2048).decode("UTF-8")
+        ircmsg = ircmsg.strip('\n\r')
+        print(ircmsg)
 
 def ping(): # respond to server Pings.
-  ircsock.send(bytes("PONG :pingis\n", "UTF-8"))
+    ircsock.send(bytes("PONG :pingis\n", "UTF-8"))
 
 def sendmsg(msg, target=channels[0]): # sends messages to the target.
-  ircsock.send(bytes("PRIVMSG "+ target +" :"+ msg +"\n", "UTF-8"))
+    ircsock.send(bytes("PRIVMSG "+ target +" :"+ msg +"\n", "UTF-8"))
 
 def send_help_msg(channel):
     sendmsg("Usage: [repo]/#[issue_num]", channel)
@@ -41,12 +41,17 @@ def parse_msg(name, msg, channel):
     for word in words:
         if word.find("#") != -1:
             repo = "godot"
-            issue = word.split('#',1)[1]
-            if word.find("/") != -1:
-                repo = word.split("/",1)[0]
-        
+            split = word.split('#', 1)
+            try_repo = split[0]
+            issue = split[1]
+
+            if try_repo in repos:
+                repo = try_repo
+            elif word.find("/") != -1:
+                repo = word.split("/", 1)[0]
+
             if repo in repos and issue.isnumeric():
-                generate_answer(repo, issue, channel)  
+                generate_answer(repo, issue, channel)
 
 def generate_answer(repo, issue, channel):
     repo_name = repos[repo]
