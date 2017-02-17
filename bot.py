@@ -6,6 +6,7 @@ ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server = "chat.freenode.net" # Server
 channels = ["#godotengine-devel"] # Channels
 botnick = "IssueBot" # Your bots nick
+ignore_nicks = ["Gobot"] # don't talk with bots
 adminname = "Hinsbart" #Your IRC nickname.
 exitcode = "!IssueBot-quit"
 helpcmd = "!IssueBot-help"
@@ -90,6 +91,8 @@ def main():
             channel = privmsg.split(':',1)[0].strip()
             message = privmsg.split(':',1)[1]
             print(channel)
+            if name in ignore_nicks:
+                continue
             parse_msg(name, message, channel)
             if message.rstrip() == exitcode:
                 #sendmsg("bye!")
