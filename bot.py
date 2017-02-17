@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-import socket
+import re
 import requests
+
+import socket
 
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server = "chat.freenode.net" # Server
@@ -44,14 +46,14 @@ def parse_msg(name, msg, channel):
             repo = "godot"
             split = word.split('#', 1)
             try_repo = split[0]
-            issue = split[1]
+            issue = re.sub('[^0-9]','', split[1])
 
             if try_repo in repos:
                 repo = try_repo
             elif word.find("/") != -1:
                 repo = word.split("/", 1)[0]
 
-            if repo in repos and issue.isnumeric():
+            if repo in repos:
                 generate_answer(repo, issue, channel)
 
 def generate_answer(repo, issue, channel):
