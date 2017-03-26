@@ -71,17 +71,21 @@ class IssueBot(irc.IRCClient):
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
 
-
-    # callbacks for events
+    def ignore_message(self, user, message):
+        if user in self.ignore_nicks:
+            return True
+        for nick in self.ignore_nicks:
+            if nick in message:
+                return True
+        return False
 
     def signedOn(self):
         self.join(self.factory.channel)
 
     def privmsg(self, user, channel, msg):
         user = user.split('!', 1)[0]
-        if user in self.ignore_nicks:
-            return
-        self.msgHandler.parse_msg(user,msg,channel)
+        if not self.ignore_message(user, msg):
+            self.msgHandler.parse_msg(user,msg,channel)
 
 
 class IssueBotFactory(protocol.ClientFactory):
