@@ -15,10 +15,6 @@ class MessageHandler:
         self.org   = org
         self.repos = repos
 
-    def parse_dlscript(self, name, msg, channel):
-        if "what is dlscript?" in msg.lower():
-            self.bot.msg(channel, name+", DLScript refers to the \"Dynamic Linking Script\" module: https://github.com/GodotNativeTools/godot_headers#what-is-dlscript")
-
     def parse_msg(self, name, msg, channel):
         words = msg.split(" ")
         for word in words:
@@ -35,8 +31,6 @@ class MessageHandler:
 
                 if repo in self.repos:
                     self.generate_answer(repo, issue, channel)
-
-        self.parse_dlscript(name, msg, channel)
 
     def generate_answer(self, repo, issue, channel):
         repo_name = self.repos[repo]
