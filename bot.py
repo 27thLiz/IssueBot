@@ -16,26 +16,45 @@ class MessageHandler:
         self.repos = repos
 
     def parse_msg(self, name, msg, channel):
+        if (msg == "!IssueBot-help"):
+            self.print_usage(channel)
+            return
+
         words = msg.split(" ")
         for word in words:
             if word.find("#") != -1:
-                repo = "godot"
+                repo = ""
                 split = word.split('#', 1)
                 try_repo = split[0]
                 issue = re.sub('[^0-9]','', split[1])
 
-                if try_repo in self.repos:
-                    repo = try_repo
-                elif word.find("/") != -1:
+                if word.find("/") != -1:
                     repo = word.split("/", 1)[0]
+                elif try_repo != "":
+                    repo = try_repo
+                else:
+                    repo = "godot"
 
                 if repo in self.repos:
                     self.generate_answer(repo, issue, channel)
+                else:
+                    self.print_wrong_usage(channel, name, repo)
+
+
+    def print_usage(self, channel):
+        message = "Usage: [repo]/#[issue_number]\n" + self.get_available_repos()
+        self.bot.msg(channel, message)
+
+    def print_wrong_usage(self, channel, user, repo):
+        message = user + ": Unknown repository \"" + repo + "\"\n" + self.get_available_repos()
+        self.bot.msg(channel, message)
+
+    def get_available_repos(self):
+        return "Available repositories: godot, demos, docs, assetlib, escoria, collada"
 
     def generate_answer(self, repo, issue, channel):
         repo_name = self.repos[repo]
         r = requests.get("https://api.github.com/repos/godotengine/" + repo_name + "/issues/" + issue)
-        print("res code: " + str(r.status_code))
         if r.status_code == 200:
             response = r.json()
             title = response["title"]
@@ -46,7 +65,7 @@ class MessageHandler:
             if r.status_code == 201:
                 #send_answer(repo, issue, title, r.headers["Location"], channel)
                 if repo == "godot":
-                    repo = "#";
+                    repo = "#"
                 else:
                     repo = repo + "/#"
                 message = repo + issue + ": " + title + " | " + r.headers["Location"]
