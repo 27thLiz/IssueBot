@@ -14,9 +14,10 @@ class MessageHandler:
         self.bot   = bot
         self.org   = org
         self.repos = repos
+        self.help_commands = ["!IssueBot-help", "!help", "!usage"]
 
     def parse_msg(self, name, msg, channel):
-        if (msg == "!IssueBot-help"):
+        if (msg in self.help_commands):
             self.print_usage(channel)
             return
 
