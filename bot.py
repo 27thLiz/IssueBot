@@ -41,15 +41,15 @@ class MessageHandler:
                 if repo in self.repos:
                     self.generate_answer(repo, issue, channel)
                 else:
-                    self.print_wrong_usage(channel, name, repo)
+                    self.print_wrong_usage(channel, repo)
 
 
     def print_usage(self, channel):
         message = "Usage: [repo]/#[issue_number]\n" + self.get_available_repos()
         self.bot.msg(channel, message)
 
-    def print_wrong_usage(self, channel, user, repo):
-        message = user + ": Unknown repository \"" + repo + "\"\n" + self.get_available_repos()
+    def print_wrong_usage(self, channel, repo):
+        message = "Unknown repository \"" + repo + "\"\n" + self.get_available_repos()
         self.bot.msg(channel, message)
 
     def get_available_repos(self):
@@ -121,7 +121,6 @@ class IssueBotFactory(protocol.ClientFactory):
     def clientConnectionFailed(self, connector, reason):
         print("connection failed:", reason)
         reactor.stop()
-
 
 if __name__ == '__main__':
     # initialize logging
