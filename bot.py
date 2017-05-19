@@ -93,7 +93,8 @@ class IssueBot(irc.IRCClient):
         return False
 
     def signedOn(self):
-        self.join(self.factory.channel)
+        for channel in self.factory.channels:
+            self.join(channel)
 
     def privmsg(self, user, channel, msg):
         user = user.split('!', 1)[0]
@@ -107,8 +108,8 @@ class IssueBotFactory(protocol.ClientFactory):
     A new protocol instance will be created each time we connect to the server.
     """
     protocol = IssueBot
-    def __init__(self, channel):
-        self.channel = channel
+    def __init__(self, channels):
+        self.channels = channels
 
     def clientConnectionLost(self, connector, reason):
         """If we get disconnected, reconnect to server."""
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     log.startLogging(sys.stdout)
 
     # create factory protocol and application
-    f = IssueBotFactory("#godotengine-devel")
+    f = IssueBotFactory(["godotengine", "#godotengine-devel"])
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
