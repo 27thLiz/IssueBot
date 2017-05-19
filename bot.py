@@ -26,8 +26,11 @@ class MessageHandler:
                 repo = ""
                 split = word.split('#', 1)
                 try_repo = split[0]
-                issue = re.sub('[^0-9]','', split[1])
 
+                res = re.match(r"[0-9]+", split[1])
+                if not res: return
+
+                issue = res.group(0)
                 if word.find("/") != -1:
                     repo = word.split("/", 1)[0]
                 elif try_repo != "":
@@ -125,7 +128,7 @@ if __name__ == '__main__':
     log.startLogging(sys.stdout)
 
     # create factory protocol and application
-    f = IssueBotFactory(["godotengine", "#godotengine-devel"])
+    f = IssueBotFactory(["#godotengine", "#godotengine-devel"])
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
