@@ -80,7 +80,7 @@ class IssueBot(irc.IRCClient):
     """Simple irc bot that resolves Github issues to links"""
 
     nickname = "IssueBot"
-    ignore_nicks = ["goBot"]
+    ignore_nicks = ["goBot", "[-einbot2-]"]
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.msgHandler = MessageHandler(self, "godotengine", {"godot":"godot", "demos":"godot-demo-projects", "docs":"godot-docs", "assetlib":"asset-library", "escoria":"escoria", "collada":"collada-exporter"})
