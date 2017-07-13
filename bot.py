@@ -128,7 +128,7 @@ if __name__ == '__main__':
     log.startLogging(sys.stdout)
 
     # create factory protocol and application
-    f = IssueBotFactory(["#godotengine", "#godotengine-devel"])
+    f = IssueBotFactory(["#godotengine", "#godotengine-devel", "#godotengine-docs", "godotengine-atelier"])
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
