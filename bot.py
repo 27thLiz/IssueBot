@@ -80,7 +80,7 @@ class IssueBot(irc.IRCClient):
     """Simple irc bot that resolves Github issues to links"""
 
     nickname = "IssueBot"
-    ignore_nicks = ["goBot", "[-einbot2-]"]
+    ignore = ["goBot", "[-einbot2-]", "http", "https"]
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.msgHandler = MessageHandler(self, "godotengine", {"godot":"godot", "demos":"godot-demo-projects", "docs":"godot-docs", "assetlib":"asset-library", "escoria":"escoria", "collada":"collada-exporter"})
@@ -89,10 +89,10 @@ class IssueBot(irc.IRCClient):
         irc.IRCClient.connectionLost(self, reason)
 
     def ignore_message(self, user, message):
-        if user in self.ignore_nicks:
+        if user in self.ignore:
             return True
-        for nick in self.ignore_nicks:
-            if nick in message:
+        for ignore_str in self.ignore:
+            if ignore_str in message:
                 return True
         return False
 
