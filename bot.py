@@ -5,20 +5,47 @@ from __future__ import print_function
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 from twisted.python import log
+from github import Github
 import re
 import requests
 import sys
 
 class MessageHandler:
-    def __init__(self, bot, org, repos):
+    def __init__(self, bot, org, repos, gh):
         self.bot   = bot
         self.org   = org
         self.repos = repos
+        self.github = gh
         self.help_commands = ["!IssueBot-help", "!help", "!usage"]
+        self.current_pr = 0
+        self.repo = gh.get_repo("godotengine/godot")
+        self.pulls = []
+
+
+    def get_pulls(self):
+        all_pulls = self.repo.get_pulls()
+        self.pulls = []
+        for pr in all_pulls:
+            if pr.milestone != None and pr.milestone.title == "3.0":
+                self.pulls.append(pr)
+        print(self.pulls)
 
     def parse_msg(self, name, msg, channel):
         if (msg in self.help_commands):
             self.print_usage(channel)
+            return
+
+        if (msg == "!startmeeting"):
+            self.get_pulls()
+            self.current_pr = 0
+            self.print_pr_link(channel)
+            self.print_pr(channel)
+            self.current_pr += 1
+            return
+
+        if (msg == "!next"):
+            self.print_pr(channel)
+            self.current_pr += 1
             return
 
         words = msg.split(" ")
@@ -44,6 +71,13 @@ class MessageHandler:
                 else:
                     self.print_wrong_usage(channel, repo)
 
+
+    def print_pr(self, channel):
+        self.generate_answer("godot", str(self.pulls[self.current_pr].number), channel)
+
+    def print_pr_link(self, channel):
+        message = "List of 3.0 PRs: https://github.com/godotengine/godot/pulls?q=is%3Aopen+is%3Apr+milestone%3A3.0"
+        self.bot.msg(channel, message)
 
     def print_usage(self, channel):
         message = "Usage: [repo]/#[issue_number]\n" + self.get_available_repos()
@@ -81,9 +115,16 @@ class IssueBot(irc.IRCClient):
 
     nickname = "IssueBot"
     ignore = ["goBot", "[-einbot2-]", "http", "https"]
+    gh = Github()
+
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
-        self.msgHandler = MessageHandler(self, "godotengine", {"godot":"godot", "demos":"godot-demo-projects", "docs":"godot-docs", "assetlib":"asset-library", "escoria":"escoria", "collada":"collada-exporter"})
+        self.msgHandler = MessageHandler(self, "godotengine",
+                                         {"godot": "godot", "demos": "godot-demo-projects", "docs": "godot-docs",
+                                          "assetlib": "asset-library", "escoria": "escoria", "collada": "collada-exporter",
+                                          "design": "godot-design"},
+                                         self.gh)
+        self.repo = self.gh.get_repo("godotengine/godot")
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
@@ -128,7 +169,7 @@ if __name__ == '__main__':
     log.startLogging(sys.stdout)
 
     # create factory protocol and application
-    f = IssueBotFactory(["#godotengine", "#godotengine-devel", "#godotengine-docs", "godotengine-atelier"])
+    f = IssueBotFactory(["#godotengine", "#godotengine-devel", "#godotengine-docs", "#godotengine-atelier"])
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
