@@ -10,17 +10,17 @@ import re
 import requests
 import sys
 
+
 class MessageHandler:
     def __init__(self, bot, org, repos, gh):
-        self.bot   = bot
-        self.org   = org
+        self.bot = bot
+        self.org = org
         self.repos = repos
         self.github = gh
         self.help_commands = ["!IssueBot-help", "!help", "!usage"]
         self.current_pr = 0
         self.repo = gh.get_repo("godotengine/godot")
         self.pulls = []
-
 
     def get_pulls(self):
         all_pulls = self.repo.get_pulls()
@@ -56,7 +56,8 @@ class MessageHandler:
                 try_repo = split[0]
 
                 res = re.match(r"[0-9]+", split[1])
-                if not res: return
+                if not res:
+                    return
 
                 issue = res.group(0)
                 if word.find("/") != -1:
@@ -71,16 +72,17 @@ class MessageHandler:
                 else:
                     self.print_wrong_usage(channel, repo)
 
-
     def print_pr(self, channel):
-        self.generate_answer("godot", str(self.pulls[self.current_pr].number), channel)
+        self.generate_answer("godot", str(
+            self.pulls[self.current_pr].number), channel)
 
     def print_pr_link(self, channel):
         message = "List of 3.0 PRs: https://github.com/godotengine/godot/pulls?q=is%3Aopen+is%3Apr+milestone%3A3.0"
         self.bot.msg(channel, message)
 
     def print_usage(self, channel):
-        message = "Usage: [repo]/#[issue_number]\n" + self.get_available_repos()
+        message = "Usage: [repo]/#[issue_number]\n" + \
+            self.get_available_repos()
         self.bot.msg(channel, message)
 
     def print_wrong_usage(self, channel, repo):
@@ -92,12 +94,14 @@ class MessageHandler:
 
     def generate_answer(self, repo, issue, channel):
         repo_name = self.repos[repo]
-        r = requests.get("https://api.github.com/repos/godotengine/" + repo_name + "/issues/" + issue)
+        r = requests.get(
+            "https://api.github.com/repos/godotengine/" + repo_name + "/issues/" + issue)
         if r.status_code == 200:
             response = r.json()
             title = response["title"]
             long_url = response["html_url"]
-            header = {'user-agent': 'IssueBot/0.0.1', "content-type": "application/x-www-form-urlencoded"}
+            header = {'user-agent': 'IssueBot/0.0.1',
+                      "content-type": "application/x-www-form-urlencoded"}
             body = {"url": long_url}
             r = requests.post("https://git.io/", headers=header, data=body)
             if r.status_code == 201:
@@ -106,9 +110,11 @@ class MessageHandler:
                     repo = "#"
                 else:
                     repo = repo + "/#"
-                message = repo + issue + ": " + title + " | " + r.headers["Location"]
+                message = repo + issue + ": " + \
+                    title + " | " + r.headers["Location"]
                 #sendmsg(message, channel)
                 self.bot.msg(channel, message)
+
 
 class IssueBot(irc.IRCClient):
     """Simple irc bot that resolves Github issues to links"""
@@ -144,7 +150,7 @@ class IssueBot(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         user = user.split('!', 1)[0]
         if not self.ignore_message(user, msg):
-            self.msgHandler.parse_msg(user,msg,channel)
+            self.msgHandler.parse_msg(user, msg, channel)
 
 
 class IssueBotFactory(protocol.ClientFactory):
@@ -153,6 +159,7 @@ class IssueBotFactory(protocol.ClientFactory):
     A new protocol instance will be created each time we connect to the server.
     """
     protocol = IssueBot
+
     def __init__(self, channels):
         self.channels = channels
 
@@ -164,12 +171,14 @@ class IssueBotFactory(protocol.ClientFactory):
         print("connection failed:", reason)
         reactor.stop()
 
+
 if __name__ == '__main__':
     # initialize logging
     log.startLogging(sys.stdout)
 
     # create factory protocol and application
-    f = IssueBotFactory(["#godotengine", "#godotengine-devel", "#godotengine-docs", "#godotengine-atelier"])
+    f = IssueBotFactory(["#godotengine", "#godotengine-devel",
+                         "#godotengine-docs", "#godotengine-atelier"])
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
